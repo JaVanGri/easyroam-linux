@@ -4,6 +4,8 @@
 # | Setup easyroam with NetworkManager on linux | #
 # | Developed by https://github.com/jahtz       | #
 # +---------------------------------------------+ #
+# | Modified by https://github.com/JaVanGri     | #
+# +---------------------------------------------+ #
 
 # easyroam: https://www.easyroam.de/
 # DFN: https://www.dfn.de/

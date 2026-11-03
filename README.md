@@ -1,28 +1,24 @@
 # easyroam-linux
 
-Setup eduroam with easyroam on unsupported linux devices.
+Set up eduroam with [easyroam](https://www.easyroam.de) (DFN) on Linux – without the official app.
 
-## Motivation
+> [!NOTE]
+> This is a fork of **[jahtz/easyroam-linux](https://github.com/jahtz/easyroam-linux)** by [Janik Haitz](https://github.com/jahtz), who wrote the original scripts. All credit for the idea and the base goes to him.
+> The improvements in this fork have been proposed upstream ([#9](https://github.com/jahtz/easyroam-linux/pull/9), [#10](https://github.com/jahtz/easyroam-linux/pull/10)) – if they are merged, prefer the original repository.
 
-German universities (as of the time of writing) are switching from the official eduroam client to [easyroam](https://www.easyroam.de) by [DFN](https://www.dfn.de/) in october 2024.
-Since I needed to set up Wi-Fi on my Fedora notebook, I tried to follow their guide but quickly realized that they only officially provide a .deb client for Debian-based distributions and porting the file with [alien](https://joeyh.name/code/alien/) did not work. 
+## Why this fork?
 
-So, I sent an email asking for an .rpm package, and they responded with:
+On my Pop!_OS 24.04 laptop the official easyroam app (Snap) did not work, so I set up eduroam manually and ended up improving jahtz's NetworkManager script along the way:
 
-> [...] uns ist es leider nicht möglich die easyroam app für RHEL/Fedora basierte Distros (.rpm Package) und/oder für die vielen anderen proprietären Linux Derivate zur Verfügung zu stellen. Das wird uns leider niemals gelingen.
-
-which roughly translates to: _no, never_.
-
-I started following their [guide](https://doku.tid.dfn.de/de:eduroam:easyroam#installation_der_easyroam_app_auf_linux_geraeten_network_manager) for a manual setup with NetworkManager but realized that they assume you can only use NetworkManager on Debian, which is not always the case. So, here are two small scripts to make your life easier: one for extracting certificate and key files from a PKCS#12 (.p12) bundle file, and another for directly setting up easyroam/eduroam on Fedora (and possibly other distributions as well). 
-
-Currently, the direct setup has been tested only on Fedora with NetworkManager, but I can extend support to other distributions and other network managers if there is interest.
+- **Server certificate validation** (`DNS:easyroam.eduroam.de`), as required by the [DFN guide](https://doku.tid.dfn.de/de:eduroam:easyroam#installation_der_easyroam_profile_auf_linux_geraeten)
+- **Private key and certificates only readable by you** (`umask 077`)
+- **Finds your .p12 file automatically** (next to the script, in the current directory or in `~/Downloads`)
+- Paths with `~` work (e.g. `~/Downloads/laptop.p12`)
+- Shows the **certificate's expiry date** and points you to easyroam.de if no certificate is found
 
 ## Usage
 
-You can either use `easyroam.sh` to extract the certificate files and set up your network manually, or, if you have NetworkManager installed, use `easyroam_nm.sh` to set up the network automatically.
-
-> [!NOTE]
-> These scripts are also useful on Debian/Ubuntu-based distributions where the official easyroam app is available but does not work as expected (e.g. on Pop!_OS 24.04, the Snap version failed). They do not depend on the app.
+You can either use `easyroam.sh` to extract the certificate files and set up your network manually, or, if you have NetworkManager installed, use `easyroam_nm.sh` to set up the network automatically. The scripts do not depend on the official app.
 
 ### Obtaining your Certificate
 
@@ -37,14 +33,14 @@ You can either use `easyroam.sh` to extract the certificate files and set up you
 
 ### Option 1: Automatic NetworkManager Setup
 > [!WARNING]
-> Tested on Fedora Workstation 42 and Pop!_OS 24.04
+> Tested on Fedora Workstation 42 (upstream) and Pop!_OS 24.04 (this fork)
 
 > [!NOTE]
 > For immutable distributions like Fedora Atomic Desktops, refer to [kimuraseki's fork](https://github.com/kimuraseki/easyroam-linux).
 
 1. Download the script
     ```bash
-    curl -o easyroam_nm.sh https://raw.githubusercontent.com/jahtz/easyroam-linux/main/easyroam_nm.sh
+    curl -o easyroam_nm.sh https://raw.githubusercontent.com/JaVanGri/easyroam-linux/main/easyroam_nm.sh
     ```
 2. Make it executable:
     ```
@@ -59,12 +55,10 @@ You can either use `easyroam.sh` to extract the certificate files and set up you
 > If the .p12 file is in the same directory as the script, the current directory or _~/Downloads_, the newest one is suggested automatically – just press Enter. If no file is found, the script points you to https://www.easyroam.de.
 
 > [!TIP]
-> To remove the generated configuration, delete the file _/etc/NetworkManager/system-connections/easyroam.nmconnection_ <br>or run: `nmcli connection delete easyroam` 
+> To remove the generated configuration, delete the file _/etc/NetworkManager/system-connections/easyroam.nmconnection_ <br>or run: `nmcli connection delete easyroam`
 
 > [!NOTE]
 > easyroam certificates expire. The script prints the expiry date at the end. To renew, download a new .p12 file from https://www.easyroam.de and run the script again – the old connection is replaced automatically.
-
-
 
 ### Option 2: Manual Setup
 This script only unpacks the PKCS12 (.p12) file for manual network configuration
@@ -75,7 +69,7 @@ This script only unpacks the PKCS12 (.p12) file for manual network configuration
 
 1. Download the script
     ```bash
-    curl -o easyroam.sh https://raw.githubusercontent.com/jahtz/easyroam-linux/main/easyroam.sh
+    curl -o easyroam.sh https://raw.githubusercontent.com/JaVanGri/easyroam-linux/main/easyroam.sh
     ```
 2. Make it executable:
     ```
@@ -90,3 +84,9 @@ Resulting files:
 - `easyroam_root_ca.pem` &rarr; CA certificate
 - `easyroam_client_cert.pem` &rarr; User certificate
 - `easyroam_client_key.pem` &rarr; Private key
+
+## Credits & License
+
+- Original scripts and documentation: [jahtz/easyroam-linux](https://github.com/jahtz/easyroam-linux) by Janik Haitz
+- Setup based on the [easyroam documentation of the DFN](https://doku.tid.dfn.de/de:eduroam:easyroam)
+- Licensed under the [Apache License 2.0](LICENSE), like the original. `easyroam_nm.sh` and this README were modified in this fork (see commit history).
