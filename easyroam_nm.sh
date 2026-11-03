@@ -41,7 +41,8 @@ echo
 
 # DEFAULT VALUES
 PKPW=$(tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 15)  # random password
-OUTDIR="$( getent passwd "$USER" | cut -d: -f6 )/.cert/easyroam"
+SCRIPTDIR="$( cd "$( dirname "$0" )" && pwd )"
+OUTDIR="$SCRIPTDIR/certs"  # certificates are stored next to the script
 LEGACY="-legacy"
 
 # DEPENDENCY CHECK
@@ -61,8 +62,7 @@ check_dependency "openssl"
 # PROMTS
 echo
 # Suggest the newest .p12 file in the script directory, the current directory or ~/Downloads
-scriptdir="$( cd "$( dirname "$0" )" && pwd )"
-p12default=$(ls -t "$scriptdir"/*.p12 "$PWD"/*.p12 "$HOME"/Downloads/*.p12 2>/dev/null | head -n 1)
+p12default=$(ls -t "$SCRIPTDIR"/*.p12 "$PWD"/*.p12 "$HOME"/Downloads/*.p12 2>/dev/null | head -n 1)
 if [[ -n "$p12default" ]]; then
     echo -e "Select PKCS12 (.p12) bundle file [Default: $p12default]:"
 else
@@ -125,7 +125,9 @@ fi
 echo "Done"
 
 echo -n "Copy PKCS12 file... "
-cp "$p12file" "$outputdir" || { echo "Failed to copy PKCS12 file."; exit 1; }
+if [[ "$(readlink -f "$p12file")" != "$(readlink -f "$outputdir/$p12name")" ]]; then
+    cp "$p12file" "$outputdir" || { echo "Failed to copy PKCS12 file."; exit 1; }
+fi
 echo "Done"
 cd "$outputdir" || { echo "Failed to change directory."; exit 1; }
 

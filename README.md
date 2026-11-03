@@ -14,6 +14,7 @@ On my Pop!_OS 24.04 laptop the official easyroam app (Snap) did not work, so I s
 - **Private key and certificates only readable by you** (`umask 077`)
 - **Finds your .p12 file automatically** (next to the script, in the current directory or in `~/Downloads`)
 - Paths with `~` work (e.g. `~/Downloads/laptop.p12`)
+- **Certificates are stored next to the script** (`certs/`) by default instead of a hidden folder
 - Shows the **certificate's expiry date** and points you to easyroam.de if no certificate is found
 
 ## Usage
@@ -53,6 +54,9 @@ You can either use `easyroam.sh` to extract the certificate files and set up you
 
 > [!TIP]
 > If the .p12 file is in the same directory as the script, the current directory or _~/Downloads_, the newest one is suggested automatically – just press Enter. If no file is found, the script points you to https://www.easyroam.de.
+
+> [!IMPORTANT]
+> The certificates are stored in a `certs` folder next to the script by default. Keep the script in a permanent place (not e.g. _~/Downloads_) – if the `certs` folder is deleted, the Wi-Fi connection stops working.
 
 > [!TIP]
 > To remove the generated configuration, delete the file _/etc/NetworkManager/system-connections/easyroam.nmconnection_ <br>or run: `nmcli connection delete easyroam`
